@@ -1,37 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <model version="NetLogo 7.0.4" snapToGrid="true">
-  <code><![CDATA[to go
+  <code><![CDATA[patches-own[
+  isLiving
+  living_n
+  next_state
+]
+
+to go
   ask patches[
-    let blacks count neighbors with [pcolor = black] ; la función neighbors es una vencidad de moore
-    let whites count neighbors with [pcolor = white]
-    (ifelse
-    whites < 2 and pcolor = white [ set pcolor black]
-    whites = 2 or whites = 3 and pcolor = white [ set pcolor white]
-    whites > 3 and pcolor = white [ set pcolor black]
-    whites = 2 and pcolor = black [ set pcolor white])
+    let whites count neighbors with [pcolor = white] ; la función neighbors es una vencidad de moore    
+
+    set living_n whites
+    if
+    whites < 2 and pcolor = white 
+    [ 
+      set next_state black
+    ]
+    if
+    (whites = 2 or whites = 3) and pcolor = white 
+    [ 
+      set next_state white
+    ]
+    if
+    whites > 3 and pcolor = white 
+    [ 
+      set next_state black
+    ]
+    if
+    whites = 3 and pcolor = black 
+    [ 
+      set next_state white
+    ]
   ]
   
+  ask patches[
+    set pcolor next_state
+    set isLiving (next_state = white)
+  ]
+  tick
+end
+
+to gohl
+  ask patches[
+    let whites count neighbors with [pcolor = white] ; la función neighbors es una vencidad de moore    
+
+    set living_n whites
+    if
+    whites < 2 and pcolor = white 
+    [ 
+      set next_state black
+    ]
+    if
+    (whites = 2 or whites = 3) and pcolor = white 
+    [ 
+      set next_state white
+    ]
+    if
+    whites > 3 and pcolor = white 
+    [ 
+      set next_state black
+    ]
+    if
+    (whites = 3 or whites = 6) and pcolor = black 
+    [ 
+      set next_state white
+    ]
+  ]
+  
+  ask patches[
+    set pcolor next_state
+    set isLiving (next_state = white)
+  ]
   tick
 end
 
 to set-up
   clear-all
+  reset-ticks
   resize-world -22 22 -22 22
   ask patches[
     let state random-float 1
-    ifelse state <= 1.0
+    ifelse state <= 0.75
     [
+      set isLiving false
       set pcolor black
     ]
     [
+      set isLiving true
       set pcolor white
     ] 
   ]
-  
-  reset-ticks
 end
 
-
+;para cambiar el estado directamente en la interfaz del mundo
 to change_cell
   if mouse-down? and mouse-inside? [
     ask patch round mouse-xcor round mouse-ycor [
@@ -54,12 +115,29 @@ end
     <view x="275" wrappingAllowedX="true" y="50" frameRate="30.0" minPycor="-22" height="590" showTickCounter="true" patchSize="13.0" fontSize="10" wrappingAllowedY="true" width="590" tickCounterLabel="ticks" maxPycor="22" updateMode="0" maxPxcor="22" minPxcor="-22"></view>
     <input x="1020" multiline="false" y="195" height="60" variable="cell_xcor" type="number" width="250">-20.0</input>
     <button x="1015" y="120" height="40" disableUntilTicks="false" forever="true" kind="Observer" width="101">change_cell</button>
-    <button x="1160" y="55" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="55">set-up</button>
     <button x="1015" y="55" height="40" disableUntilTicks="false" forever="true" kind="Observer" width="55">go</button>
     <input x="1305" multiline="false" y="195" height="60" variable="cell_ycor" type="number" width="250">20.0</input>
-    <note x="1300" y="50" backgroundDark="-987046" fontSize="12" width="150" markdown="true" height="70" textColorDark="-16777216" textColorLight="-16777216" backgroundLight="0">WORLD SIZE
+    <plot x="995" autoPlotX="true" yMax="1000.0" autoPlotY="true" yAxis="celulas" y="460" xMin="0.0" height="175" legend="false" xMax="250.0" yMin="0.0" width="230" xAxis="tiempo" display="población">
+      <setup></setup>
+      <update></update>
+      <pen interval="1.0" mode="0" display="vivas" color="-13791810" legend="true">
+        <setup>
+</setup>
+        <update>plot count patches with [isLiving]
+</update>
+      </pen>
+      <pen interval="1.0" mode="0" display="muertas" color="-16710398" legend="true">
+        <setup></setup>
+        <update>plot count patches with [not isLiving]
+
+</update>
+      </pen>
+    </plot>
+    <note x="1440" y="75" backgroundDark="-987046" fontSize="12" width="150" markdown="true" height="70" textColorDark="-16777216" textColorLight="-16777216" backgroundLight="0">WORLD SIZE
 
 (-22,-22); (22,-22)</note>
+    <button x="1255" y="60" height="40" disableUntilTicks="false" forever="false" kind="Observer" width="55">set-up</button>
+    <button x="1105" y="55" height="40" disableUntilTicks="false" forever="true" kind="Observer" width="61">gohl</button>
   </widgets>
   <info>## WHAT IS IT?
 
